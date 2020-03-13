@@ -61,8 +61,7 @@ class EmployeeRepositoryImplementationDynamo(private val dynamoDBMapper: DynamoD
         val employeeFound = index.query(query)
         val iterator: IteratorSupport<Item, QueryOutcome> = employeeFound.iterator()
         if (iterator.hasNext()) {
-            return ConvertJsonToObject()
-                .jsonFromObject(iterator.next().toJSONPretty(), Employee::class.java)
+            return ConvertJsonToObject().jsonFromObject(iterator.next().toJSONPretty(), Employee::class.java)
         }
         return null
     }

@@ -9,6 +9,7 @@ import com.amazonaws.services.dynamodbv2.document.QueryOutcome
 import com.amazonaws.services.dynamodbv2.document.internal.IteratorSupport
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import org.springframework.format.datetime.DateFormatter
 import org.springframework.stereotype.Repository
 import pontointeligente.domain.entity.Launch
 import pontointeligente.domain.enums.TypeEnum
@@ -16,6 +17,7 @@ import pontointeligente.infrastructure.exception.NotFoundException
 import pontointeligente.repository.contract.LaunchRepository
 import pontointeligente.repository.helper.ConvertJsonToObject
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Repository("launchRepositoryDynamo")
@@ -72,30 +74,33 @@ class LaunchRepositoryImplementationDynamo(private val dynamoDBMapper: DynamoDBM
     }
 
     override fun findLaunchByEmployeeDateAndType(employeeCpf: String, dateLaunch: LocalDate, type: TypeEnum): Launch? {
-        val launchListFound: ArrayList<Launch> = arrayListOf()
         val table = dynamoDB.getTable("smart_point")
         val index = table.getIndex("sk-type-index")
         val expression = "#pk = :cpf and #sk = :sk"
+        val expressionFilter = "begins_with(#dateOfLaunch, :dateOfLaunch)"
         val query = QuerySpec()
             .withKeyConditionExpression(expression)
+            .withFilterExpression(expressionFilter)
             .withNameMap(
                 mapOf(
                     "#pk" to "sk",
-                    "#sk" to "type"
+                    "#sk" to "type",
+                    "#dateOfLaunch" to "dateOfLaunch"
                 )
             )
             .withValueMap(
                 mapOf(
                     ":cpf" to "EMPLOYEE_CPF-$employeeCpf",
-                    ":sk" to type.toString()
+                    ":sk" to type.toString(),
+                    ":dateOfLaunch" to dateLaunch.format(DateTimeFormatter.ISO_LOCAL_DATE)
                 )
             )
         val employeeFound = index.query(query)
         val iterator: IteratorSupport<Item, QueryOutcome> = employeeFound.iterator()
         while (iterator.hasNext()) {
-            launchListFound.add(ConvertJsonToObject().jsonFromObject(iterator.next().toJSONPretty(), Launch::class.java))
+            return ConvertJsonToObject().jsonFromObject(iterator.next().toJSONPretty(), Launch::class.java)
         }
-        return launchListFound.find { LocalDate.parse(it.dateOfLaunch.substring(0, 10)) == dateLaunch }
+        return null
     }
 
     override fun save(launch: Launch): Launch {

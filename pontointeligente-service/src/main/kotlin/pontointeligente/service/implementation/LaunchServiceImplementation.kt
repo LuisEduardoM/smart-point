@@ -41,14 +41,13 @@ class LaunchServiceImplementation(
 
     override fun findLaunchByEmployee(cpf: String): List<Launch> =
         launchRepository.findLaunchByEmployee(cpf)
-    //launchRepository.findLaunchByEmployee(employeeServiceImplementation.findByCpf(cpf).pk)
 
     override fun calculateHoursWorkedByEmployee(cpf: String): List<CalculationHoursWorked> =
         findLaunchByEmployee(cpf)
             .groupBy(
                 keySelector = { it.dateOfLaunch.substring(0,10) },
                 valueTransform = { it })
-            .map { calculateHours(it.key, it.value) }
+            .map { extractDateToCalculateHours(it.key, it.value) }
 
     override fun save(launch: Launch): Launch {
         employeeServiceImplementation.findByCpf(launch.employeeCpf)
@@ -81,7 +80,7 @@ class LaunchServiceImplementation(
         }
     }
 
-    private fun calculateHours(data: String, launchList: List<Launch>): CalculationHoursWorked {
+    private fun extractDateToCalculateHours(data: String, launchList: List<Launch>): CalculationHoursWorked {
         if (launchList.size == 4) {
             val formatterDate = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
             var startWork = launchList.find { it.type == TypeEnum.START_WORK }
@@ -109,12 +108,16 @@ class LaunchServiceImplementation(
             if (startWork == null || startLunch == null || endLunch == null || endWork == null) {
                 return CalculationHoursWorked(data, "Incorrect point registration!")
             }
-            val difference = startWork.until(startLunch, ChronoUnit.MILLIS) + endLunch.until(endWork, ChronoUnit.MILLIS)
-            val hours = difference / 3600000
-            val minutes = (difference - hours * 3600000) / 60000
-            return CalculationHoursWorked(data, "Hours worked $hours:$minutes")
+            return calculateHours(startWork, startLunch, endLunch, endWork)
         }
         return CalculationHoursWorked(data, "Incorrect point registration!")
+    }
+
+    private fun calculateHours(startWork: LocalDateTime, startLunch: LocalDateTime, endLunch: LocalDateTime, endWork: LocalDateTime): CalculationHoursWorked {
+        val difference = startWork.until(startLunch, ChronoUnit.MILLIS) + endLunch.until(endWork, ChronoUnit.MILLIS)
+        val hours = difference / 3600000
+        val minutes = (difference - hours * 3600000) / 60000
+        return CalculationHoursWorked(startWork.toLocalDate().toString(), "Hours worked $hours:$minutes")
     }
 
     private fun checkPointAlreadyExists(launch: Launch) {
