@@ -1,5 +1,6 @@
 package pontointeligente.service.implementation
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -28,6 +29,8 @@ open class CompanyServiceImplementation(
     @Value("\${kafka.smart.point.update.company.topic}")
     private lateinit var updateCompanyTopic: String
 
+    private val log = LoggerFactory.getLogger(CompanyServiceImplementation::class.java)
+
     override fun findAll(): List<Company> = companyRepository.findAll()
 
     override fun findById(id: String): Optional<Company> = companyRepository.findById(id)
@@ -41,6 +44,7 @@ open class CompanyServiceImplementation(
     override fun save(company: Company): Company {
         checkCompanyAlreadyRegisteredByCnpj(company)
         val companySaved = companyRepository.save(company)
+        log.debug("Company response [$companySaved] returned from the method save with id [${companySaved.id}]")
         producerTopicKafka(saveCompanyTopic, companySaved.cnpj, companySaved)
         return companySaved
     }
@@ -49,12 +53,14 @@ open class CompanyServiceImplementation(
         checkCompanyExists(id)
         checkCompanyAlreadyRegisteredByCnpj(company)
         val companySaved = companyRepository.save(company.copy(id = id))
+        log.debug("Company response [$companySaved] returned from the method update with id [${companySaved.id}]")
         producerTopicKafka(updateCompanyTopic, companySaved.cnpj, companySaved)
         return companySaved
     }
 
     override fun delete(id: String) {
         companyRepository.deleteById(id)
+        log.debug("Company [$id] id deleted")
     }
 
     fun checkCompanyExists(id: String): Company {
@@ -85,10 +91,11 @@ open class CompanyServiceImplementation(
     private fun producerTopicKafka(topic: String, key: String, data: Any) {
         try {
             retrySendTopic.sendTopicToKafkaTemplate(topic, key, data)
+            log.debug("Data [$data] published on [$topic] topic")
         } catch (e: Exception) {
             when (e) {
                 is InterruptedException, is ExecutionException, is TimeoutException -> {
-                    println("error:${e.printStackTrace()}")
+                    log.error("error:${e.printStackTrace()} when trying to publish data [$data] on [$topic] topic")
                 }
             }
         }

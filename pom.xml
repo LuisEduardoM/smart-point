@@ -120,8 +120,6 @@
                 <artifactId>log4j-core</artifactId>
                 <version>${log4j-core-version}</version>
             </dependency>
-
-
             <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-dynamodb -->
             <dependency>
                 <groupId>com.amazonaws</groupId>
@@ -134,7 +132,6 @@
                 <artifactId>spring-data-dynamodb</artifactId>
                 <version>${spring-data-dynamodb-version}</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -142,6 +139,11 @@
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
         <plugins>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.6.0.1398</version>
+            </plugin>
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -169,5 +171,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
