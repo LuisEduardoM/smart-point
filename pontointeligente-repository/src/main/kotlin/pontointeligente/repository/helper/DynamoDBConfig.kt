@@ -14,8 +14,8 @@ import org.springframework.stereotype.Controller
 @Controller
 class DynamoDBConfig {
 
-    private val amazonAWSAccessKey: String = "AKIAQQIKWAVMDVAMUPVQ"
-    private val amazonAWSSecretKey: String = "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"
+    private val amazonAWSAccessKey: String = ""
+    private val amazonAWSSecretKey: String = ""
 
     @Bean
     fun dynamoDB(): DynamoDB = DynamoDB(amazonDynamoDB())
