@@ -1,14 +1,20 @@
 package pontointeligente.service.service
 
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.test.util.ReflectionTestUtils
+import pontointeligente.domain.entity.Launch
 import pontointeligente.domain.enums.TypeEnum
+import pontointeligente.infrastructure.exception.BusinessRuleException
 import pontointeligente.service.AbstractService
+import pontointeligente.service.builder.LaunchBuilder
 import pontointeligente.service.contract.LaunchService
 import pontointeligente.service.implementation.LaunchServiceImplementation
+import java.time.LocalDate
 import java.util.*
 
 class LaunchServiceTest : AbstractService() {
@@ -66,6 +72,37 @@ class LaunchServiceTest : AbstractService() {
     }
 
     @Test
+    fun calculateHoursWorkedByEmployee() {
+        whenever(launchRepository.findLaunchByEmployee(employee.cpf)).thenReturn(launchList)
+        val hoursWorkedList = launchService.calculateHoursWorkedByEmployee(employee.cpf)
+        assertTrue(hoursWorkedList.isNotEmpty())
+        hoursWorkedList.forEach {
+            if (it.data == "2020-01-28") {
+                assertTrue(it.horas == "Hours worked 8:0")
+            }
+            if (it.data == "2020-01-27") {
+                assertTrue(it.horas == "Hours worked 8:43")
+            }
+        }
+    }
+
+    @Test
+    fun calculateHoursWorkedByEmployeeWithIncorrectPoint() {
+        launchList.remove(launchList.find { it.dateOfLaunch.substring(0,10) == "2020-01-28" && it.type == TypeEnum.START_WORK })
+        whenever(launchRepository.findLaunchByEmployee(employee.cpf)).thenReturn(launchList)
+        val hoursWorkedList = launchService.calculateHoursWorkedByEmployee(employee.cpf)
+        assertTrue(hoursWorkedList.isNotEmpty())
+        hoursWorkedList.forEach {
+            if (it.data == "2020-01-28") {
+                assertTrue(it.horas == "Incorrect point registration!")
+            }
+            if (it.data == "2020-01-27") {
+                assertTrue(it.horas == "Hours worked 8:43")
+            }
+        }
+    }
+
+    @Test
     fun save() {
         whenever(employeeServiceImplementation.checkEmployeeExists(launch.employeeCpf)).thenReturn(employee)
         whenever(launchRepository.save(launch)).thenReturn(launch)
@@ -76,6 +113,21 @@ class LaunchServiceTest : AbstractService() {
         assertEquals(launch.location, launchSaved.location)
         assertEquals(launch.description, launchSaved.description)
         assertEquals(launch.employeeCpf, launchSaved.employeeCpf)
+    }
+
+    @Test
+    fun doNotSaveWhenPointAlreadyExists() {
+        val dateOfLaunch = LocalDate.parse(launch.dateOfLaunch.substring(0, 10))
+        val launchSave = launch
+        whenever(
+            launchRepository.findLaunchByEmployeeDateAndType(
+                launch.employeeCpf,
+                dateOfLaunch,
+                launch.type
+            )
+        ).thenReturn(launchSave)
+        assertThrows(BusinessRuleException::class.java) { launchService.save(launch) }
+        verify(launchRepository, times(0)).save(launch)
     }
 
     @Test
@@ -93,6 +145,13 @@ class LaunchServiceTest : AbstractService() {
         assertEquals(launchUpdate.location, launchSaved.location)
         assertEquals(launchUpdate.description, launchSaved.description)
         assertEquals(launchUpdate.employeeCpf, launchSaved.employeeCpf)
+    }
+
+    @Test
+    fun doNotUpdateWhenLaunchDoesNotExistsById() {
+        val launchUpdate = launch.copy(id = "10")
+        assertThrows(BusinessRuleException::class.java) { launchService.update(launchUpdate.id, launchUpdate) }
+        verify(launchRepository, times(0)).save(launchUpdate)
     }
 
     @Test

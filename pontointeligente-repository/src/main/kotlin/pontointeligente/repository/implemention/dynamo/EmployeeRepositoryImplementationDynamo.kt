@@ -37,9 +37,7 @@ class EmployeeRepositoryImplementationDynamo(private val dynamoDBMapper: DynamoD
             .withKeyConditionExpression(expression)
             .addExpressionAttributeValuesEntry(":pk", AttributeValue(pk))
         val resultQuery = dynamoDBMapper.query(Employee::class.java, query)
-        if (resultQuery.isNullOrEmpty()) return Optional.empty()
         return Optional.of(resultQuery.first())
-        return Optional.ofNullable(dynamoDBMapper.load(Employee::class.java, pk))
     }
 
     override fun findByCpf(cpf: String): Employee? {

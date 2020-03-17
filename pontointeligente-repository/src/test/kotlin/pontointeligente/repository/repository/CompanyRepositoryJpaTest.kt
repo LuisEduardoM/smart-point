@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.test.annotation.Rollback
 import pontointeligente.repository.AbstractRepository
 
-class CompanyRepositoryTest : AbstractRepository() {
+class CompanyRepositoryJpaTest : AbstractRepository() {
 
     @BeforeEach
     fun init() {

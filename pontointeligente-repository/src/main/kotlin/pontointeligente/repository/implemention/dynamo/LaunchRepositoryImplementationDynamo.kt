@@ -41,9 +41,7 @@ class LaunchRepositoryImplementationDynamo(private val dynamoDBMapper: DynamoDBM
             .withKeyConditionExpression(expression)
             .addExpressionAttributeValuesEntry(":pk", AttributeValue(pk))
         val resultQuery = dynamoDBMapper.query(Launch::class.java, query)
-        if (resultQuery.isNullOrEmpty()) return Optional.empty()
         return Optional.of(resultQuery.first())
-        return Optional.ofNullable(dynamoDBMapper.load(Launch::class.java, pk))
     }
 
     override fun findLaunchByEmployee(employeeCpf: String): List<Launch> {

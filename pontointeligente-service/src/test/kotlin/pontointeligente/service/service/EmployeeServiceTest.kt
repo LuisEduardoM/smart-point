@@ -8,9 +8,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.test.util.ReflectionTestUtils
 import pontointeligente.infrastructure.exception.BusinessRuleException
+import pontointeligente.infrastructure.exception.NotFoundException
 import pontointeligente.service.AbstractService
 import pontointeligente.service.contract.EmployeeService
 import pontointeligente.service.implementation.EmployeeServiceImplementation
+import java.time.LocalDate
 import java.util.*
 
 class EmployeeServiceTest : AbstractService() {
@@ -54,6 +56,14 @@ class EmployeeServiceTest : AbstractService() {
     }
 
     @Test
+    fun doNotFindByCpfWhenCpfDoesNotExists() {
+        val employeeCpf = "111111111"
+        whenever(employeeRepository.findByCpf(employeeCpf)).thenThrow(NotFoundException::class.java)
+        assertThrows(NotFoundException::class.java) { employeeService.findByCpf(employee.cpf) }
+        verify(employeeRepository, times(0)).findByCpf(employeeCpf)
+    }
+
+    @Test
     fun findById() {
         whenever(employeeRepository.findById(employee.id)).thenReturn(Optional.of(employee))
         val employeeFound = employeeService.findById(employee.id)
@@ -76,22 +86,21 @@ class EmployeeServiceTest : AbstractService() {
         verify(employeeRepository, times(1)).save(employee)
     }
 
-    @Test
-    fun naoSalvarQuandoEmpresaNaoExiste() {
-        val idEmpesa = "10"
-        //company = company.copy(id = idEmpesa)
-        val employee = employee.copy(idCompany = idEmpesa)
-
-        whenever(companyServiceImplementation.checkCompanyExists(idEmpesa)).thenThrow(BusinessRuleException::class.java)
-        assertThrows(BusinessRuleException::class.java) { employeeService.save(employee) }
-        verify(employeeRepository, times(0)).save(employee)
-    }
+//    @Test
+//    fun doNotSaveWhenCompanyDoesNotExists() {
+//        val companyId = "10"
+//        val employee = employee.copy(idCompany = companyId)
+//        whenever(companyServiceImplementation.checkCompanyExists(companyId)).thenThrow(BusinessRuleException::class.java)
+//        assertThrows(BusinessRuleException::class.java) { employeeService.save(employee) }
+//        verify(employeeRepository, times(0)).save(employee)
+//    }
 
     @Test
     fun update() {
         val employeeUpdate = employee
         employeeUpdate.copy(name = "Luis Eduardo", cpf = "98765432115")
         whenever(employeeRepository.findById(employee.id)).thenReturn(Optional.of(employee))
+        whenever(employeeRepository.findByCpf(employee.cpf)).thenReturn(employeeUpdate)
         whenever(employeeRepository.save(employeeUpdate)).thenReturn(employeeUpdate)
         whenever(companyServiceImplementation.checkCompanyExists(employee.idCompany)).thenReturn(company)
         val employeeSaved = employeeService.update(employeeUpdate.id, employeeUpdate)
@@ -106,34 +115,43 @@ class EmployeeServiceTest : AbstractService() {
     }
 
     @Test
-    fun nãoAtualizarQuandoEmpresaNaoExiste() {
-        val idEmpresa = "10"
-        val funcionarioAtualizar = employee.copy(name = "Luis Eduardo", cpf = "98765432115", idCompany = idEmpresa)
+    fun doNotSaveOrUpdateWhenCompanyDoesNotExists() {
+        val companyId = "10"
+        val employeeUpdate = employee.copy(name = "Luis Eduardo", cpf = "98765432115", idCompany = companyId)
         whenever(employeeRepository.findById(employee.id)).thenReturn(Optional.of(employee))
 
-        whenever(companyServiceImplementation.checkCompanyExists(idEmpresa)).thenThrow(BusinessRuleException::class.java)
+        whenever(companyServiceImplementation.checkCompanyExists(companyId)).thenThrow(BusinessRuleException::class.java)
         assertThrows(BusinessRuleException::class.java) {
             employeeService.update(
-                funcionarioAtualizar.id,
-                funcionarioAtualizar
+                employeeUpdate.id,
+                employeeUpdate
             )
+            employeeService.save(employeeUpdate)
         }
-        verify(employeeRepository, times(0)).save(funcionarioAtualizar)
+        verify(employeeRepository, times(0)).save(employeeUpdate)
     }
 
     @Test
-    fun nãoAtualizarQuandoFuncionarioNaoExiste() {
-        val idFuncionario = "10"
-        val funcionarioAtualizar = employee.copy(name = "Luis Eduardo", cpf = "98765432115", id = idFuncionario)
+    fun doNotUpdateOrSaveWhenEmployeeAlreadyRegisteredByCpf() {
+        val saveEmployee = employee.copy(id = "10")
+        whenever(employeeRepository.findByCpf(employee.cpf)).thenReturn(saveEmployee)
+        assertThrows(BusinessRuleException::class.java) { employeeService.save(employee) }
+        verify(employeeRepository, times(0)).save(employee)
+    }
 
-        whenever(employeeServiceImplementation.checkEmployeeExists(idFuncionario)).thenThrow(BusinessRuleException::class.java)
+    @Test
+    fun doNotUpdateWhenEmployeeDoesNotExists() {
+        val employeeId = "10"
+        val employeeUpdate = employee.copy(name = "Luis Eduardo", cpf = "98765432115", id = employeeId)
+
+        whenever(employeeServiceImplementation.checkEmployeeExists(employeeId)).thenThrow(BusinessRuleException::class.java)
         assertThrows(BusinessRuleException::class.java) {
             employeeService.update(
-                funcionarioAtualizar.id,
-                funcionarioAtualizar
+                employeeUpdate.id,
+                employeeUpdate
             )
         }
-        verify(employeeRepository, times(0)).save(funcionarioAtualizar)
+        verify(employeeRepository, times(0)).save(employeeUpdate)
     }
 
     @Test
@@ -142,13 +160,4 @@ class EmployeeServiceTest : AbstractService() {
         employeeService.delete(employee.id)
         verify(employeeRepository, times(1)).deleteById(employee.id)
     }
-
-//    @Test
-//    fun naoDeletarQuandoFuncionarioNaoExiste() {
-//        val idFuncionario = "10"
-//        val funcionario = employee.copy(id = idFuncionario)
-//        whenever(employeeServiceImplementation.checkEmployeeExists(idFuncionario)).thenThrow(BusinessRuleException::class.java)
-//        assertThrows(BusinessRuleException::class.java) { employeeService.delete(funcionario.id) }
-//        verify(employeeRepository, times(0)).deleteById(funcionario.id)
-//    }
 }

@@ -98,7 +98,6 @@ class EmployeeServiceImplementation(
         } catch (e: Exception) {
             when (e) {
                 is InterruptedException, is ExecutionException, is TimeoutException -> {
-                    println("error:${e.printStackTrace()}")
                     log.error("error:${e.printStackTrace()} when trying to publish data [$data] on [$topic] topic")
                 }
             }

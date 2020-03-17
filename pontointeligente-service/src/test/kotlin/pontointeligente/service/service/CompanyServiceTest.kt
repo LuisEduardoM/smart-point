@@ -6,11 +6,9 @@ import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.TestPropertySource
 import org.springframework.test.util.ReflectionTestUtils
 import pontointeligente.infrastructure.exception.BusinessRuleException
+import pontointeligente.infrastructure.exception.NotFoundException
 import pontointeligente.service.AbstractService
 import pontointeligente.service.contract.CompanyService
 import pontointeligente.service.implementation.CompanyServiceImplementation
@@ -52,11 +50,19 @@ class CompanyServiceTest : AbstractService() {
 
     @Test
     fun findByCnpj() {
-        whenever(companyRepository.findByCnpj(company.cnpj.toString())).thenReturn(company)
-        val companyFound = companyService.findByCnpj(company.cnpj.toString())
+        whenever(companyRepository.findByCnpj(company.cnpj)).thenReturn(company)
+        val companyFound = companyService.findByCnpj(company.cnpj)
         assertNotNull(companyFound)
         assertEquals(company.cnpj, companyFound.cnpj)
-        verify(companyRepository, times(1)).findByCnpj(company.cnpj.toString())
+        verify(companyRepository, times(1)).findByCnpj(company.cnpj)
+    }
+
+    @Test
+    fun doNotFindByCnpjWhenCnpjDoesNotExists(){
+        val companyCnpj = "11111111111111"
+        whenever(companyRepository.findByCnpj(companyCnpj)).thenThrow(NotFoundException::class.java)
+        assertThrows(NotFoundException::class.java) {companyService.findByCnpj(company.cnpj)}
+        verify(companyRepository, times(0)).findByCnpj(companyCnpj)
     }
 
     @Test
@@ -74,6 +80,7 @@ class CompanyServiceTest : AbstractService() {
         var companyUpdate = company
         companyUpdate.copy(corporationName = "Zup")
         whenever(companyRepository.findById(company.id)).thenReturn(Optional.of(company))
+        whenever(companyRepository.findByCnpj(company.cnpj)).thenReturn(companyUpdate)
         whenever(companyRepository.save(companyUpdate)).thenReturn(companyUpdate)
         val companySaved = companyService.update(companyUpdate.id, companyUpdate)
         assertNotNull(companySaved)
@@ -81,6 +88,14 @@ class CompanyServiceTest : AbstractService() {
         assertEquals(companyUpdate.cnpj, companySaved.cnpj)
         assertEquals(companyUpdate.corporationName, companySaved.corporationName)
         verify(companyRepository, times(1)).save(companyUpdate)
+    }
+
+    @Test
+    fun doNotUpdateOrSaveWhenCompanyAlreadyRegisteredByCnpj(){
+        var saveCompany = company.copy(id = "10")
+        whenever(companyRepository.findByCnpj(company.cnpj)).thenReturn(saveCompany)
+        assertThrows(BusinessRuleException::class.java){companyService.save(company)}
+        verify(companyRepository, times(0)).save(company)
     }
 
     @Test

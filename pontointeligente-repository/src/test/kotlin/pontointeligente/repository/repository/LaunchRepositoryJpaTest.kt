@@ -9,7 +9,7 @@ import pontointeligente.domain.entity.Launch
 import pontointeligente.repository.AbstractRepository
 import java.time.LocalDate
 
-class LaunchRepositoryTest : AbstractRepository() {
+class LaunchRepositoryJpaTest : AbstractRepository() {
 
     @BeforeEach
     fun init() {

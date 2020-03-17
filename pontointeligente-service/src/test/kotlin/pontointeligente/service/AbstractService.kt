@@ -1,9 +1,7 @@
 package pontointeligente.service
 
 import com.nhaarman.mockitokotlin2.mock
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.test.context.TestPropertySource
-import org.springframework.test.util.ReflectionTestUtils
 import pontointeligente.common.kafka.scheculer.RetrySendTopic
 import pontointeligente.domain.entity.Company
 import pontointeligente.domain.entity.Employee
@@ -38,10 +36,12 @@ abstract class AbstractService {
     protected lateinit var company: Company
     protected lateinit var employee: Employee
     protected lateinit var launch: Launch
+    protected lateinit var launchList: ArrayList<Launch>
 
     fun start() {
         company = CompanyBuilder.builder()
         employee = EmployeeBuilder.builder(company)
         launch = LaunchBuilder.builder(employee)
+        launchList = LaunchBuilder.builderToCalculateHoursWorkedByLaunch(employee)
     }
 }
