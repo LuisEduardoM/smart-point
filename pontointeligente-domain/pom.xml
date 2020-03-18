@@ -16,12 +16,12 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         <dependency>
-            <groupId>br.com.pontointeligente</groupId>
-            <artifactId>pontointeligente-infrastructure</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.github.spring-data-dynamodb</groupId>
             <artifactId>spring-data-dynamodb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>br.com.pontointeligente</groupId>
+            <artifactId>pontointeligente-infrastructure</artifactId>
         </dependency>
     </dependencies>
 </project>

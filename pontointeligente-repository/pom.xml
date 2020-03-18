@@ -32,16 +32,13 @@
             <groupId>com.github.spring-data-dynamodb</groupId>
             <artifactId>spring-data-dynamodb</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>br.com.pontointeligente</groupId>
-            <artifactId>pontointeligente-domain</artifactId>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.json/json -->
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20190722</version>
+        </dependency>
+        <dependency>
+            <groupId>br.com.pontointeligente</groupId>
+            <artifactId>pontointeligente-domain</artifactId>
         </dependency>
 
         <dependency>
