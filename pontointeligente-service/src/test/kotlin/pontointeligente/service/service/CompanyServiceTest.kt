@@ -16,14 +16,14 @@ import java.util.*
 
 class CompanyServiceTest : AbstractService() {
 
-    lateinit var companyService: CompanyService
+    private lateinit var companyService: CompanyService
 
     @BeforeEach
     fun init() {
         companyService = CompanyServiceImplementation(companyRepository, retrySendTopic)
         super.start()
-        ReflectionTestUtils.setField(companyService, "saveCompanyTopic", "PONTO_INTELIGENTE_SAVE_COMPANY")
-        ReflectionTestUtils.setField(companyService, "updateCompanyTopic", "PONTO_INTELIGENTE_UPDATE_COMPANY")
+        ReflectionTestUtils.setField(companyService, "saveCompanyTopic", "\${kafka.smart.point.save.company.topic}")
+        ReflectionTestUtils.setField(companyService, "updateCompanyTopic", "\${kafka.smart.point.update.company.topic}")
     }
 
     @Test

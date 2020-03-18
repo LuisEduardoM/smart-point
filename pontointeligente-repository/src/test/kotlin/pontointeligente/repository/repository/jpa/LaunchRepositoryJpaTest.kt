@@ -1,4 +1,4 @@
-package pontointeligente.repository.repository
+package pontointeligente.repository.repository.jpa
 
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.Assertions.*

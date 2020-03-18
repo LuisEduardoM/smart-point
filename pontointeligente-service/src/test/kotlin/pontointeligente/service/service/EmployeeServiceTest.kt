@@ -12,7 +12,6 @@ import pontointeligente.infrastructure.exception.NotFoundException
 import pontointeligente.service.AbstractService
 import pontointeligente.service.contract.EmployeeService
 import pontointeligente.service.implementation.EmployeeServiceImplementation
-import java.time.LocalDate
 import java.util.*
 
 class EmployeeServiceTest : AbstractService() {
@@ -27,8 +26,9 @@ class EmployeeServiceTest : AbstractService() {
             retrySendTopic
         )
         super.start()
-        ReflectionTestUtils.setField(employeeService, "saveEmployeeTopic", "PONTO_INTELIGENTE_SAVE_EMPLOYEE")
-        ReflectionTestUtils.setField(employeeService, "updateEmployeeTopic", "PONTO_INTELIGENTE_UPDATE_EMPLOYEE")
+        ReflectionTestUtils.setField(employeeService, "saveEmployeeTopic", "\${kafka.smart.point.save.employee.topic}")
+        ReflectionTestUtils.setField(employeeService, "updateEmployeeTopic", "\${kafka.smart.point.update.employee.topic}"
+        )
     }
 
     @Test
@@ -85,15 +85,6 @@ class EmployeeServiceTest : AbstractService() {
         assertEquals(employee.idCompany, employeeSaved.idCompany)
         verify(employeeRepository, times(1)).save(employee)
     }
-
-//    @Test
-//    fun doNotSaveWhenCompanyDoesNotExists() {
-//        val companyId = "10"
-//        val employee = employee.copy(idCompany = companyId)
-//        whenever(companyServiceImplementation.checkCompanyExists(companyId)).thenThrow(BusinessRuleException::class.java)
-//        assertThrows(BusinessRuleException::class.java) { employeeService.save(employee) }
-//        verify(employeeRepository, times(0)).save(employee)
-//    }
 
     @Test
     fun update() {

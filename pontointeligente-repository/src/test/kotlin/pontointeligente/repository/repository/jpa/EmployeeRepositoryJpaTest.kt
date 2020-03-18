@@ -1,4 +1,4 @@
-package pontointeligente.repository.repository
+package pontointeligente.repository.repository.jpa
 
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -17,8 +17,8 @@ class EmployeeRepositoryJpaTest : AbstractRepository() {
     @Test
     @Rollback
     fun save() {
-        whenever(employeeRepository.save(employee)).thenReturn(employee)
-        val employeeSaved = employeeRepository.save(employee)
+        whenever(this.employeeRepository.save(employee)).thenReturn(employee)
+        val employeeSaved = this.employeeRepository.save(employee)
         assertNotNull(employeeSaved)
         assertNotNull(employeeSaved.id)
     }
@@ -26,8 +26,8 @@ class EmployeeRepositoryJpaTest : AbstractRepository() {
     @Test
     @Rollback
     fun findByCpf() {
-        whenever(employeeRepository.findByCpf(employee.cpf)).thenReturn(employee)
-        val employeeFound = employeeRepository.findByCpf(employee.cpf)
+        whenever(this.employeeRepository.findByCpf(employee.cpf)).thenReturn(employee)
+        val employeeFound = this.employeeRepository.findByCpf(employee.cpf)
         assertNotNull(employeeFound)
     }
 }

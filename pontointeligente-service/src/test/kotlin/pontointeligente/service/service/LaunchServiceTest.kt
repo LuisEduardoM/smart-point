@@ -7,11 +7,9 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.test.util.ReflectionTestUtils
-import pontointeligente.domain.entity.Launch
 import pontointeligente.domain.enums.TypeEnum
 import pontointeligente.infrastructure.exception.BusinessRuleException
 import pontointeligente.service.AbstractService
-import pontointeligente.service.builder.LaunchBuilder
 import pontointeligente.service.contract.LaunchService
 import pontointeligente.service.implementation.LaunchServiceImplementation
 import java.time.LocalDate
@@ -29,8 +27,8 @@ class LaunchServiceTest : AbstractService() {
             retrySendTopic
         )
         super.start()
-        ReflectionTestUtils.setField(launchService, "saveLaunchTopic", "PONTO_INTELIGENTE_SAVE_LAUNCH")
-        ReflectionTestUtils.setField(launchService, "updateLaunchTopic", "PONTO_INTELIGENTE_UPDATE_LAUNCH")
+        ReflectionTestUtils.setField(launchService, "saveLaunchTopic", "\${kafka.smart.point.save.launch.topic}")
+        ReflectionTestUtils.setField(launchService, "updateLaunchTopic", "\${kafka.smart.point.update.launch.topic}")
     }
 
     @Test
@@ -88,7 +86,12 @@ class LaunchServiceTest : AbstractService() {
 
     @Test
     fun calculateHoursWorkedByEmployeeWithIncorrectPoint() {
-        launchList.remove(launchList.find { it.dateOfLaunch.substring(0,10) == "2020-01-28" && it.type == TypeEnum.START_WORK })
+        launchList.remove(launchList.find {
+            it.dateOfLaunch.substring(
+                0,
+                10
+            ) == "2020-01-28" && it.type == TypeEnum.START_WORK
+        })
         whenever(launchRepository.findLaunchByEmployee(employee.cpf)).thenReturn(launchList)
         val hoursWorkedList = launchService.calculateHoursWorkedByEmployee(employee.cpf)
         assertTrue(hoursWorkedList.isNotEmpty())

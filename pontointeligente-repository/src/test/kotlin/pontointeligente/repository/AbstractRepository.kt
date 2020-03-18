@@ -1,5 +1,8 @@
 package pontointeligente.repository
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression
+import com.amazonaws.services.dynamodbv2.document.DynamoDB
 import com.nhaarman.mockitokotlin2.mock
 import pontointeligente.domain.entity.Company
 import pontointeligente.domain.entity.Employee
@@ -10,12 +13,17 @@ import pontointeligente.repository.builder.LaunchBuilder
 import pontointeligente.repository.contract.CompanyRepository
 import pontointeligente.repository.contract.EmployeeRepository
 import pontointeligente.repository.contract.LaunchRepository
+import pontointeligente.repository.implemention.dynamo.CompanyRepositoryImplementationDynamo
 
 abstract class AbstractRepository {
 
-    protected val companyRepository: CompanyRepository = mock()
-    protected val employeeRepository: EmployeeRepository = mock()
-    protected val launchRepository: LaunchRepository = mock()
+    protected var companyRepository: CompanyRepository = mock()
+    protected var employeeRepository: EmployeeRepository = mock()
+    protected var launchRepository: LaunchRepository = mock()
+    protected val dynamoDBMapper: DynamoDBMapper = mock()
+    protected val dynamoDB: DynamoDB = mock()
+
+    protected val companyRepositoryImplementationDynamo: CompanyRepositoryImplementationDynamo = mock()
 
     protected lateinit var company: Company
     protected lateinit var employee: Employee
