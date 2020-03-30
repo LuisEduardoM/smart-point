@@ -14,7 +14,7 @@ class EmployeeRepositoryDynamoTest : AbstractRepository() {
 
     @BeforeEach
     fun init() {
-        employeeRepository = EmployeeRepositoryImplementationDynamo(dynamoDBMapper = dynamoDBMapper, dynamoDB = dynamoDB)
+        employeeRepository = EmployeeRepositoryImplementationDynamo(dynamoDBMapper = dynamoDBMapper)
         super.start()
     }
 

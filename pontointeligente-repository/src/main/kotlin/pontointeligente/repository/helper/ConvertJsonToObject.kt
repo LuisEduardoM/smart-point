@@ -18,7 +18,9 @@ class ConvertJsonToObject {
             .registerModule(KotlinModule())
     }
 
-    fun <T> jsonFromObject(json: String, type: Class<T>): T = ConvertJsonToObject().objectMapper.readValue(json, type)
+    fun <T> jsonFromObject(json: String, type: Class<T>): T {
+      return ConvertJsonToObject().objectMapper.readValue(json, type)
+    }
 
     fun <T> jsonFromListObject(json: String, type: Class<T>): List<T> {
         var objectList: ArrayList<T> = ArrayList()

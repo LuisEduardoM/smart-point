@@ -4,24 +4,18 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression
 import com.amazonaws.services.dynamodbv2.document.DynamoDB
-import com.amazonaws.services.dynamodbv2.document.Item
-import com.amazonaws.services.dynamodbv2.document.QueryOutcome
-import com.amazonaws.services.dynamodbv2.document.internal.IteratorSupport
-import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import org.springframework.format.datetime.DateFormatter
 import org.springframework.stereotype.Repository
 import pontointeligente.domain.entity.Launch
 import pontointeligente.domain.enums.TypeEnum
 import pontointeligente.infrastructure.exception.NotFoundException
 import pontointeligente.repository.contract.LaunchRepository
-import pontointeligente.repository.helper.ConvertJsonToObject
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Repository("launchRepositoryDynamo")
-class LaunchRepositoryImplementationDynamo(private val dynamoDBMapper: DynamoDBMapper, val dynamoDB: DynamoDB) :
+class LaunchRepositoryImplementationDynamo(private val dynamoDBMapper: DynamoDBMapper) :
     LaunchRepository {
 
     override fun findAll(): List<Launch> {
@@ -45,60 +39,34 @@ class LaunchRepositoryImplementationDynamo(private val dynamoDBMapper: DynamoDBM
     }
 
     override fun findLaunchByEmployee(employeeCpf: String): List<Launch> {
-        val launchListFound: ArrayList<Launch> = arrayListOf()
-        val table = dynamoDB.getTable("smart_point")
-        val index = table.getIndex("sk-pk-index")
         val expression = "#pk = :cpf and begins_with(#sk, :sk)"
-        val query = QuerySpec()
+        val query = DynamoDBQueryExpression<Launch>()
+            .withIndexName("sk-pk-index")
             .withKeyConditionExpression(expression)
-            .withNameMap(
-                mapOf(
-                    "#pk" to "sk",
-                    "#sk" to "pk"
-                )
-            )
-            .withValueMap(
-                mapOf(
-                    ":cpf" to "EMPLOYEE_CPF-$employeeCpf",
-                    ":sk" to "LAUNCH_ID"
-                )
-            )
-        val employeeFound = index.query(query)
-        val iterator: IteratorSupport<Item, QueryOutcome> = employeeFound.iterator()
-        while (iterator.hasNext()) {
-            launchListFound.add(ConvertJsonToObject().jsonFromObject(iterator.next().toJSONPretty(), Launch::class.java))
-        }
-        return launchListFound
+            .addExpressionAttributeNamesEntry("#pk", "sk")
+            .addExpressionAttributeNamesEntry("#sk", "pk")
+            .addExpressionAttributeValuesEntry(":cpf", AttributeValue("EMPLOYEE_CPF-$employeeCpf"))
+            .addExpressionAttributeValuesEntry(":sk", AttributeValue("LAUNCH_ID"))
+            .withConsistentRead(false)
+        return dynamoDBMapper.query(Launch::class.java, query)
     }
 
     override fun findLaunchByEmployeeDateAndType(employeeCpf: String, dateLaunch: LocalDate, type: TypeEnum): Launch? {
-        val table = dynamoDB.getTable("smart_point")
-        val index = table.getIndex("sk-type-index")
         val expression = "#pk = :cpf and #sk = :sk"
-        val expressionFilter = "begins_with(#dateOfLaunch, :dateOfLaunch)"
-        val query = QuerySpec()
+        val filterExpression = "begins_with(#dateOfLaunch, :dateOfLaunch)"
+
+        val query = DynamoDBQueryExpression<Launch>()
+            .withIndexName("sk-type-index")
             .withKeyConditionExpression(expression)
-            .withFilterExpression(expressionFilter)
-            .withNameMap(
-                mapOf(
-                    "#pk" to "sk",
-                    "#sk" to "type",
-                    "#dateOfLaunch" to "dateOfLaunch"
-                )
-            )
-            .withValueMap(
-                mapOf(
-                    ":cpf" to "EMPLOYEE_CPF-$employeeCpf",
-                    ":sk" to type.toString(),
-                    ":dateOfLaunch" to dateLaunch.format(DateTimeFormatter.ISO_LOCAL_DATE)
-                )
-            )
-        val employeeFound = index.query(query)
-        val iterator: IteratorSupport<Item, QueryOutcome> = employeeFound.iterator()
-        while (iterator.hasNext()) {
-            return ConvertJsonToObject().jsonFromObject(iterator.next().toJSONPretty(), Launch::class.java)
-        }
-        return null
+            .withFilterExpression(filterExpression)
+            .addExpressionAttributeNamesEntry("#pk", "sk")
+            .addExpressionAttributeNamesEntry("#sk", "type")
+            .addExpressionAttributeNamesEntry("#dateOfLaunch", "dateOfLaunch")
+            .addExpressionAttributeValuesEntry(":cpf", AttributeValue("EMPLOYEE_CPF-$employeeCpf"))
+            .addExpressionAttributeValuesEntry(":sk", AttributeValue(type.toString()))
+            .addExpressionAttributeValuesEntry(":dateOfLaunch", AttributeValue(dateLaunch.format(DateTimeFormatter.ISO_LOCAL_DATE)))
+            .withConsistentRead(false)
+        return dynamoDBMapper.query(Launch::class.java, query).firstOrNull()
     }
 
     override fun save(launch: Launch): Launch {

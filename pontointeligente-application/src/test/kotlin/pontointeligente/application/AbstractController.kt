@@ -1,14 +1,14 @@
 package pontointeligente.application
 
+import api.request.*
+import api.response.CompanyResponse
+import api.response.EmployeeResponse
+import api.response.LaunchResponse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import pontointeligente.application.controller.request.*
-import pontointeligente.application.controller.response.CompanyResponse
-import pontointeligente.application.controller.response.EmployeeResponse
-import pontointeligente.application.controller.response.LaunchResponse
 import pontointeligente.application.converter.toRequest
 import pontointeligente.domain.enums.TypeEnum
 import java.time.LocalDateTime
@@ -23,7 +23,7 @@ abstract class AbstractController {
     @Autowired
     lateinit var mvc: MockMvc
 
-    protected fun saveLaunch(launchCreate: LaunchCreateRequest = dummylaunchRequest()): LaunchResponse {
+    protected fun saveLaunch(launchCreate: LaunchCreateRequest = dummyLaunchRequest()): LaunchResponse {
         var jsonResponse = mvc.perform(
             post(BASE_PATH_LAUNCH).contentType(MediaType.APPLICATION_JSON_VALUE).characterEncoding(
                 "UTF-8"
@@ -66,11 +66,15 @@ abstract class AbstractController {
 
     protected fun dummyCompanyRequest(
         corporateName: String = "Razao Social",
-        cnpj: String = createCnpjRandom()
+        cnpj: String = createCnpjRandom(),
+        corporateCep: String = "38408562",
+        address: Map<String, String> = mapOf("Matriz" to "38408562")
     ): CompanyCreateRequest =
         CompanyCreateRequest(
             corporateName = corporateName,
-            cnpj = cnpj
+            cnpj = cnpj,
+            corporateCep = corporateCep,
+            address = address
         )
 
     protected fun dummyEmployeeRequest(
@@ -78,16 +82,18 @@ abstract class AbstractController {
         password: String = "123456",
         email: String = "luis.marques@zup.com.br",
         name: String = "Luis Eduardo",
+        address: Map<String, String> = mapOf("Home" to "38408563", "Office" to "38408564"),
         companyRequest: CompanyRequest = saveCompany().toRequest()
     ): EmployeeCreateRequest = EmployeeCreateRequest(
         cpf = cpf,
         password = password,
         email = email,
         name = name,
+        address = address,
         companyRequest = companyRequest
     )
 
-    protected fun dummylaunchRequest(
+    protected fun dummyLaunchRequest(
         dateLaunch: String = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
         type: TypeEnum = TypeEnum.START_WORK,
         location: String = "Uberlandia Center Shoppping",
@@ -101,10 +107,10 @@ abstract class AbstractController {
         employeeRequest = employeeRequest
     )
 
-    protected fun dummyLaunchForCalculateHoursWorked(employeeRequest: EmployeeRequest = saveEmployee().toRequest() ): ArrayList<LaunchCreateRequest> {
+    protected fun dummyLaunchForCalculateHoursWorked(employeeRequest: EmployeeRequest = saveEmployee().toRequest()): ArrayList<LaunchCreateRequest> {
         var launchList: ArrayList<LaunchCreateRequest> = ArrayList()
         launchList.add(
-            dummylaunchRequest(
+            dummyLaunchRequest(
                 dateLaunch = LocalDateTime.of(2020, 1, 28, 9, 0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 type = TypeEnum.START_WORK,
                 description = "calculation of hours worked",
@@ -112,7 +118,7 @@ abstract class AbstractController {
             )
         )
         launchList.add(
-            dummylaunchRequest(
+            dummyLaunchRequest(
                 dateLaunch = LocalDateTime.of(2020, 1, 28, 12, 0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 type = TypeEnum.START_LUNCH,
                 description = "calculation of hours worked",
@@ -120,7 +126,7 @@ abstract class AbstractController {
             )
         )
         launchList.add(
-            dummylaunchRequest(
+            dummyLaunchRequest(
                 dateLaunch = LocalDateTime.of(2020, 1, 28, 13, 0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 type = TypeEnum.END_LUNCH,
                 description = "calculation of hours worked",
@@ -128,7 +134,7 @@ abstract class AbstractController {
             )
         )
         launchList.add(
-            dummylaunchRequest(
+            dummyLaunchRequest(
                 dateLaunch = LocalDateTime.of(2020, 1, 28, 18, 0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 type = TypeEnum.END_WORK,
                 description = "calculation of hours worked",
@@ -137,7 +143,7 @@ abstract class AbstractController {
         )
 
         launchList.add(
-            dummylaunchRequest(
+            dummyLaunchRequest(
                 dateLaunch = LocalDateTime.of(2020, 1, 27, 8, 33).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 type = TypeEnum.START_WORK,
                 description = "calculation of hours worked",
@@ -145,7 +151,7 @@ abstract class AbstractController {
             )
         )
         launchList.add(
-            dummylaunchRequest(
+            dummyLaunchRequest(
                 dateLaunch = LocalDateTime.of(2020, 1, 27, 11, 31).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 type = TypeEnum.START_LUNCH,
                 description = "calculation of hours worked",
@@ -153,7 +159,7 @@ abstract class AbstractController {
             )
         )
         launchList.add(
-            dummylaunchRequest(
+            dummyLaunchRequest(
                 dateLaunch = LocalDateTime.of(2020, 1, 27, 12, 15).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 type = TypeEnum.END_LUNCH,
                 description = "calculation of hours worked",
@@ -161,7 +167,7 @@ abstract class AbstractController {
             )
         )
         launchList.add(
-            dummylaunchRequest(
+            dummyLaunchRequest(
                 dateLaunch = LocalDateTime.of(2020, 1, 27, 18, 0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 type = TypeEnum.END_WORK,
                 description = "calculation of hours worked",

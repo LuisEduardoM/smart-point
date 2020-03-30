@@ -1,9 +1,6 @@
 package pontointeligente.domain.entity
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable
+import com.amazonaws.services.dynamodbv2.datamodeling.*
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
@@ -34,6 +31,11 @@ data class Employee(
     @field:DynamoDBAttribute(attributeName = "cpf")
     @get:Column(name = "cpf")
     var cpf: String = "",
+
+    @Transient
+    @DynamoDBTypeConvertedJson
+    @field:DynamoDBAttribute(attributeName = "address")
+    var address: Map<String, Address> = emptyMap(),
 
     @field:DynamoDBAttribute(attributeName = "idCompany")
     @get:Column(name = "idCompany")

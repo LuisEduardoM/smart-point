@@ -12,6 +12,14 @@
 
     <dependencies>
         <dependency>
+            <groupId>br.com.pontointeligente</groupId>
+            <artifactId>pontointeligente-service</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>br.com.pontointeligente</groupId>
+            <artifactId>pontointeligente-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.nhaarman.mockitokotlin2</groupId>
             <artifactId>mockito-kotlin</artifactId>
         </dependency>
@@ -24,15 +32,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>br.com.pontointeligente</groupId>
-            <artifactId>pontointeligente-service</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>br.com.pontointeligente</groupId>
-            <artifactId>pontointeligente-common-kafka</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
@@ -40,6 +39,14 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentracing.contrib</groupId>
+            <artifactId>opentracing-spring-jaeger-web-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

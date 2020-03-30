@@ -1,53 +1,43 @@
 package pontointeligente.application.controller
 
+import api.contract.CompanyControllerApi
+import api.request.CompanyCreateRequest
+import api.request.CompanyUpdateRequest
+import api.response.CompanyResponse
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.*
-import pontointeligente.application.controller.request.CompanyCreateRequest
-import pontointeligente.application.controller.request.CompanyUpdateRequest
-import pontointeligente.application.controller.response.CompanyResponse
+import org.springframework.web.bind.annotation.RestController
+import pontointeligente.application.controller.feign.ViaCepClient
 import pontointeligente.application.converter.toEntity
 import pontointeligente.application.converter.toResponse
+import pontointeligente.domain.entity.Company
 import pontointeligente.service.contract.CompanyService
-import javax.validation.Valid
 
 @RestController
-@RequestMapping("/company")
-class CompanyController(val companyService: CompanyService) {
+class CompanyController(val companyService: CompanyService, val viaCepClient: ViaCepClient) : CompanyControllerApi {
 
     private val log = LoggerFactory.getLogger(CompanyController::class.java)
 
-    @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    fun findAll(): List<CompanyResponse> =
+    override fun findAll(): List<CompanyResponse> =
         also { log.info("request to find all companies") }
             .run { companyService.findAll() }
             .map { it.toResponse() }
 
-    @GetMapping("/{cnpj}")
-    @ResponseStatus(HttpStatus.OK)
-    fun findByCnpj(@PathVariable cnpj: String): CompanyResponse =
-        cnpj.also { log.info("request to find company by cpj") }
+    override fun findByCnpj(cnpj: String): CompanyResponse =
+        cnpj.also { log.info("request to find company by cnpj") }
             .run { companyService.findByCnpj(cnpj) }
             .toResponse()
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    fun save(@Valid @RequestBody request: CompanyCreateRequest): CompanyResponse =
+    override fun save(request: CompanyCreateRequest): CompanyResponse =
         request.also { log.info("request to create new company") }
-            .run { companyService.save(request.toEntity()) }
+            .run { companyService.save(request.toEntity(viaCepClient)) }
             .toResponse()
 
-    @PutMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    fun update(@PathVariable id: String, @Valid @RequestBody request: CompanyUpdateRequest): CompanyResponse =
+    override fun update(id: String, request: CompanyUpdateRequest): CompanyResponse =
         request.also { log.info("request to update company") }
-            .run { companyService.update(id, request.toEntity()) }
+            .run { companyService.update(id, request.toEntity(viaCepClient)) }
             .toResponse()
 
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun delete(@PathVariable id: String) =
+    override fun delete(id: String) =
         also { log.info("request to delete company by id") }
             .run { companyService.delete(id) }
 }

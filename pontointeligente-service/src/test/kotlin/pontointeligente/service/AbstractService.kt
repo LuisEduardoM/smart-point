@@ -12,7 +12,6 @@ import pontointeligente.repository.contract.LaunchRepository
 import pontointeligente.service.builder.CompanyBuilder
 import pontointeligente.service.builder.EmployeeBuilder
 import pontointeligente.service.builder.LaunchBuilder
-import pontointeligente.service.contract.EmployeeService
 import pontointeligente.service.implementation.CompanyServiceImplementation
 import pontointeligente.service.implementation.EmployeeServiceImplementation
 
@@ -26,8 +25,6 @@ abstract class AbstractService {
     protected val companyServiceImplementation: CompanyServiceImplementation = mock()
 
     protected val launchRepository: LaunchRepository = mock()
-
-    protected val employeeServiceMock: EmployeeService = mock()
 
     protected val employeeServiceImplementation: EmployeeServiceImplementation = mock()
 

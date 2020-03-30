@@ -16,7 +16,7 @@ class CompanyRepositoryDynamoTest : AbstractRepository() {
 
     @BeforeEach
     fun init() {
-        companyRepository = CompanyRepositoryImplementationDynamo(dynamoDBMapper = dynamoDBMapper, dynamoDB = dynamoDB)
+        companyRepository = CompanyRepositoryImplementationDynamo(dynamoDBMapper = dynamoDBMapper)
         super.start()
     }
 

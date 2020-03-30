@@ -13,8 +13,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import pontointeligente.application.AbstractController
 import pontointeligente.application.PontointeligenteApplication
 import pontointeligente.application.UtilTest
-import pontointeligente.application.controller.request.CompanyCreateRequest
-import pontointeligente.application.controller.response.CompanyResponse
+import api.request.CompanyCreateRequest
+import api.response.CompanyResponse
+import pontointeligente.application.converter.toUpdateRequest
 
 @SpringBootTest(classes = [PontointeligenteApplication::class])
 @AutoConfigureMockMvc
@@ -43,8 +44,8 @@ class CompanyControllerTest() : AbstractController() {
     @Test
     fun update() {
         val companySaved: CompanyResponse
-        var companyUpdate = saveCompany()
-        companyUpdate.corporateName = "Teste"
+        var companyUpdate = saveCompany().toUpdateRequest()
+        companyUpdate = companyUpdate.copy(corporateName = "Apply", address = mapOf("Matriz" to "38408560"))
         val url = "$BASE_PATH_COMPANY/${companyUpdate.id}"
         val jsonResponse = mvc.perform(
             put(url).contentType(MediaType.APPLICATION_JSON_VALUE).characterEncoding("UTF-8").content(

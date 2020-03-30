@@ -1,22 +1,18 @@
 package pontointeligente.repository.implemention.dynamo
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression
 import com.amazonaws.services.dynamodbv2.document.DynamoDB
-import com.amazonaws.services.dynamodbv2.document.Item
-import com.amazonaws.services.dynamodbv2.document.QueryOutcome
-import com.amazonaws.services.dynamodbv2.document.internal.IteratorSupport
-import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import org.springframework.stereotype.Repository
 import pontointeligente.domain.entity.Company
 import pontointeligente.infrastructure.exception.NotFoundException
 import pontointeligente.repository.contract.CompanyRepository
-import pontointeligente.repository.helper.ConvertJsonToObject
 import java.util.*
 
 @Repository("companyRepositoryDynamo")
-class CompanyRepositoryImplementationDynamo(val dynamoDBMapper: DynamoDBMapper, val dynamoDB: DynamoDB) :
+class CompanyRepositoryImplementationDynamo(val dynamoDBMapper: DynamoDBMapper) :
     CompanyRepository {
 
     override fun findAll(): List<Company> {
@@ -35,28 +31,14 @@ class CompanyRepositoryImplementationDynamo(val dynamoDBMapper: DynamoDBMapper, 
     }
 
     override fun findByCnpj(cnpj: String): Company? {
-        val table = dynamoDB.getTable("smart_point")
-        val index = table.getIndex("cnpj-index")
         val expression = "#pk = :cnpj"
-        val query = QuerySpec()
+        val query = DynamoDBQueryExpression<Company>()
+            .withIndexName("cnpj-index")
             .withKeyConditionExpression(expression)
-            .withNameMap(
-                mapOf(
-                    "#pk" to "cnpj"
-                )
-            )
-            .withValueMap(
-                mapOf(
-                    ":cnpj" to cnpj
-                )
-            )
-        val companyFound = index.query(query)
-        val iterator: IteratorSupport<Item, QueryOutcome> = companyFound.iterator()
-        if (iterator.hasNext()) {
-            return ConvertJsonToObject()
-                .jsonFromObject(iterator.next().toJSONPretty(), Company::class.java)
-        }
-        return null
+            .addExpressionAttributeNamesEntry("#pk", "cnpj")
+            .addExpressionAttributeValuesEntry(":cnpj", AttributeValue(cnpj))
+            .withConsistentRead(false)
+        return dynamoDBMapper.query(Company::class.java, query).firstOrNull()
     }
 
     override fun save(company: Company): Company {

@@ -1,5 +1,7 @@
 package pontointeligente.application.controller
 
+import api.request.LaunchCreateRequest
+import api.response.LaunchResponse
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -11,13 +13,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import pontointeligente.application.AbstractController
 import pontointeligente.application.PontointeligenteApplication
 import pontointeligente.application.UtilTest
-import pontointeligente.application.controller.request.LaunchCreateRequest
-import pontointeligente.application.controller.response.LaunchResponse
 import pontointeligente.application.converter.toEntity
 import pontointeligente.application.converter.toRequest
 import pontointeligente.application.converter.toUpdateRequest
 import pontointeligente.domain.entity.CalculationHoursWorked
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @SpringBootTest(classes = [PontointeligenteApplication::class])
@@ -26,7 +25,7 @@ class LaunchControllerTest : AbstractController() {
 
     @Test
     fun save() {
-        val launchCreate: LaunchCreateRequest = dummylaunchRequest()
+        val launchCreate: LaunchCreateRequest = dummyLaunchRequest()
         val launchSaved: LaunchResponse
         var jsonResponse = mvc.perform(
             post(BASE_PATH_LAUNCH).contentType(MediaType.APPLICATION_JSON_VALUE).characterEncoding(
@@ -86,7 +85,7 @@ class LaunchControllerTest : AbstractController() {
     @Test
     fun findLaunchByEmployee() {
         val employee = saveEmployee()
-        val launchSaved = saveLaunch(dummylaunchRequest(employeeRequest = employee.toRequest()))
+        val launchSaved = saveLaunch(dummyLaunchRequest(employeeRequest = employee.toRequest()))
         val uri = "$BASE_PATH_LAUNCH/findLaunchByEmployee/${employee.cpf}"
         val jsonResponse =
             mvc.perform(get(uri).contentType(MediaType.APPLICATION_JSON_VALUE).characterEncoding("UTF-8"))

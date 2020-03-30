@@ -11,7 +11,7 @@ class LaunchRepositoryDynamoTest : AbstractRepository() {
 
     @BeforeEach
     fun init() {
-        launchRepository = LaunchRepositoryImplementationDynamo(dynamoDBMapper = dynamoDBMapper, dynamoDB = dynamoDB)
+        launchRepository = LaunchRepositoryImplementationDynamo(dynamoDBMapper = dynamoDBMapper)
         super.start()
     }
 

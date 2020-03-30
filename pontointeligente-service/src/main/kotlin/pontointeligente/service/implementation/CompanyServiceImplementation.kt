@@ -45,6 +45,7 @@ open class CompanyServiceImplementation(
         checkCompanyAlreadyRegisteredByCnpj(company)
         val companySaved = companyRepository.save(company)
         log.debug("Company response [$companySaved] returned from the method save with id [${companySaved.id}]")
+
         producerTopicKafka(saveCompanyTopic, companySaved.cnpj, companySaved)
         return companySaved
     }

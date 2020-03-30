@@ -1,5 +1,7 @@
 package pontointeligente.application.controller
 
+import api.request.EmployeeCreateRequest
+import api.response.EmployeeResponse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -12,8 +14,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import pontointeligente.application.AbstractController
 import pontointeligente.application.PontointeligenteApplication
 import pontointeligente.application.UtilTest
-import pontointeligente.application.controller.request.EmployeeCreateRequest
-import pontointeligente.application.controller.response.EmployeeResponse
 import pontointeligente.application.converter.toUpdateRequest
 
 @SpringBootTest(classes = [PontointeligenteApplication::class])
@@ -44,10 +44,10 @@ class EmployeeControllerTest : AbstractController() {
 
     @Test
     fun update() {
-        var employeeUpdate = saveEmployee().toUpdateRequest()
         val employeeSaved: EmployeeResponse
-        val url = "$BASE_PATH_EMPLOYEE/${employeeUpdate.id}"
+        var employeeUpdate = saveEmployee().toUpdateRequest()
         employeeUpdate = employeeUpdate.copy(name = "employee ${employeeUpdate.cpf}")
+        val url = "$BASE_PATH_EMPLOYEE/${employeeUpdate.id}"
         val jsonResponse = mvc.perform(
             put(url).contentType(MediaType.APPLICATION_JSON_VALUE).content(
                 UtilTest().objectMapper.writeValueAsBytes(employeeUpdate)
