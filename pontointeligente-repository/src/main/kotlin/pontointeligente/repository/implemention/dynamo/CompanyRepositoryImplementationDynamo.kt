@@ -10,6 +10,7 @@ import pontointeligente.domain.entity.Company
 import pontointeligente.infrastructure.exception.NotFoundException
 import pontointeligente.repository.contract.CompanyRepository
 import java.util.*
+import kotlin.collections.ArrayList
 
 @Repository("companyRepositoryDynamo")
 class CompanyRepositoryImplementationDynamo(val dynamoDBMapper: DynamoDBMapper) :
@@ -21,7 +22,7 @@ class CompanyRepositoryImplementationDynamo(val dynamoDBMapper: DynamoDBMapper) 
         val query = DynamoDBScanExpression()
             .withFilterExpression(expression)
             .addExpressionAttributeValuesEntry(":pk", AttributeValue(pkBeginWith))
-        return dynamoDBMapper.scan(Company::class.java, query, null)
+        return dynamoDBMapper.scan(Company::class.java, query, null).toList()
     }
 
     override fun findById(id: String): Optional<Company> {

@@ -3,6 +3,7 @@ package api.response
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import pontointeligente.domain.enums.TypeEnum
+import java.io.Serializable
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
 
@@ -27,4 +28,4 @@ data class LaunchResponse(
 
     @ApiModelProperty("Employee response")
     val employeeResponse: EmployeeResponse
-)
+) : Serializable

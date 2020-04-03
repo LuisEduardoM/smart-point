@@ -1,6 +1,7 @@
 package pontointeligente.domain.entity
 
 import com.amazonaws.services.dynamodbv2.datamodeling.*
+import java.io.Serializable
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
@@ -40,7 +41,7 @@ data class Employee(
     @field:DynamoDBAttribute(attributeName = "idCompany")
     @get:Column(name = "idCompany")
     var idCompany: String = ""
-) {
+) : Serializable {
 
     @Transient
     @field:DynamoDBHashKey(attributeName = "pk")

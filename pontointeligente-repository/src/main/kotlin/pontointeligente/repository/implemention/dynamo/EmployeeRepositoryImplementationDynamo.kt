@@ -20,7 +20,7 @@ class EmployeeRepositoryImplementationDynamo(private val dynamoDBMapper: DynamoD
         val query = DynamoDBScanExpression()
             .withFilterExpression(expression)
             .addExpressionAttributeValuesEntry(":pk", AttributeValue(pkBeginWith))
-        return dynamoDBMapper.scan(Employee::class.java, query, null)
+        return dynamoDBMapper.scan(Employee::class.java, query, null).toList()
     }
 
     override fun findById(id: String): Optional<Employee> {

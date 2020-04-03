@@ -16,7 +16,9 @@
     <description>Demo project for Spring Boot</description>
 
     <properties>
+        <opentracing-spring-jaeger-web-starter.version>3.1.1</opentracing-spring-jaeger-web-starter.version>
         <spring-cloud-starter-openfeign.version>2.2.2.RELEASE</spring-cloud-starter-openfeign.version>
+        <spring-boot-starter-data-redis.version>2.2.6.RELEASE</spring-boot-starter-data-redis.version>
         <aws-java-sdk-dynamodb.version>1.11.729</aws-java-sdk-dynamodb.version>
         <spring-data-dynamodb.version>5.0.3</spring-data-dynamodb.version>
         <springfox-swagger2.version>2.9.2</springfox-swagger2.version>
@@ -177,8 +179,26 @@
             <dependency>
                 <groupId>io.opentracing.contrib</groupId>
                 <artifactId>opentracing-spring-jaeger-web-starter</artifactId>
-                <version>3.1.1</version>
+                <version>${opentracing-spring-jaeger-web-starter.version}</version>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-redis</artifactId>
+                <version>${spring-boot-starter-data-redis.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+<!--            <dependency>-->
+<!--                <groupId>ch.qos.logback</groupId>-->
+<!--                <artifactId>logback-classic</artifactId>-->
+<!--                <version>1.2.3</version>-->
+<!--            </dependency>-->
+            <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-core -->
+<!--            <dependency>-->
+<!--                <groupId>ch.qos.logback</groupId>-->
+<!--                <artifactId>logback-core</artifactId>-->
+<!--                <version>1.2.3</version>-->
+<!--            </dependency>-->
         </dependencies>
     </dependencyManagement>
 

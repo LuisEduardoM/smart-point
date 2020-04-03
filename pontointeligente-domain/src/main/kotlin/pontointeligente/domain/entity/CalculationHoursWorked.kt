@@ -1,4 +1,6 @@
 package pontointeligente.domain.entity
 
-data class CalculationHoursWorked(val data: String, val horas: String) {
+import java.io.Serializable
+
+data class CalculationHoursWorked(val data: String, val horas: String) : Serializable {
 }

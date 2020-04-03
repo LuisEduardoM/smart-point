@@ -3,6 +3,9 @@ package pontointeligente.service.implementation
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import pontointeligente.common.kafka.scheculer.RetrySendTopic
 import pontointeligente.domain.entity.Company
@@ -31,25 +34,29 @@ open class CompanyServiceImplementation(
 
     private val log = LoggerFactory.getLogger(CompanyServiceImplementation::class.java)
 
+    // @Cacheable(cacheNames = ["Company"], key = "#root.method.name")
     override fun findAll(): List<Company> = companyRepository.findAll()
 
+    @Cacheable(cacheNames = ["Company"], key = "#root.method.name + #id")
     override fun findById(id: String): Optional<Company> = companyRepository.findById(id)
 
+    @Cacheable(cacheNames = ["Company"], key = "#root.method.name + #cnpj")
     override fun findByCnpj(cnpj: String): Company {
         return companyRepository.findByCnpj(cnpj) ?: throw NotFoundException(
             "Cnpj company $cnpj not found"
         )
     }
 
+    @CachePut(cacheNames = ["Company"], key = "#root.method.name + #company.id")
     override fun save(company: Company): Company {
         checkCompanyAlreadyRegisteredByCnpj(company)
         val companySaved = companyRepository.save(company)
         log.debug("Company response [$companySaved] returned from the method save with id [${companySaved.id}]")
-
         producerTopicKafka(saveCompanyTopic, companySaved.cnpj, companySaved)
         return companySaved
     }
 
+    @CachePut(cacheNames = ["Company"], key = "#root.method.name + #company.id")
     override fun update(id: String, company: Company): Company {
         checkCompanyExists(id)
         checkCompanyAlreadyRegisteredByCnpj(company)
@@ -59,6 +66,7 @@ open class CompanyServiceImplementation(
         return companySaved
     }
 
+    @CacheEvict(cacheNames = ["company"], key = "#root.method.name + #id")
     override fun delete(id: String) {
         companyRepository.deleteById(id)
         log.debug("Company [$id] id deleted")

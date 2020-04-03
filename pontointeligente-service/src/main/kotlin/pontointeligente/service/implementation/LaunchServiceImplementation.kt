@@ -2,6 +2,9 @@ package pontointeligente.service.implementation
 
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import pontointeligente.common.kafka.scheculer.RetrySendTopic
 import pontointeligente.domain.entity.CalculationHoursWorked
@@ -35,13 +38,17 @@ class LaunchServiceImplementation(
     @Value("\${kafka.smart.point.update.launch.topic}")
     private lateinit var updateLaunchTopic: String
 
+    @Cacheable(cacheNames = ["Launch"], key = "#root.method.name")
     override fun findAll(): List<Launch> = launchRepository.findAll()
 
+    @Cacheable(cacheNames = ["Launch"], key = "#root.method.name + #id")
     override fun findById(id: String): Optional<Launch> = launchRepository.findById(id)
 
+    @Cacheable(cacheNames = ["Launch"], key = "#root.method.name + #cpf")
     override fun findLaunchByEmployee(cpf: String): List<Launch> =
         launchRepository.findLaunchByEmployee(cpf)
 
+    @Cacheable(cacheNames = ["Launch"], key = "#root.method.name + #cpf")
     override fun calculateHoursWorkedByEmployee(cpf: String): List<CalculationHoursWorked> =
         findLaunchByEmployee(cpf)
             .groupBy(
@@ -49,6 +56,7 @@ class LaunchServiceImplementation(
                 valueTransform = { it })
             .map { extractDateToCalculateHours(it.key, it.value) }
 
+    @CachePut(cacheNames = ["Launch"], key = "#root.method.name + #launch.id")
     override fun save(launch: Launch): Launch {
         employeeServiceImplementation.findByCpf(launch.employeeCpf)
         checkPointAlreadyExists(launch)
@@ -57,6 +65,7 @@ class LaunchServiceImplementation(
         return launchSaved
     }
 
+    @CachePut(cacheNames = ["Launch"], key = "#root.method.name + #launch.id")
     override fun update(id: String, launch: Launch): Launch {
         checkLaunchExists(id)
         employeeServiceImplementation.findByCpf(launch.employeeCpf)
@@ -65,6 +74,7 @@ class LaunchServiceImplementation(
         return launchSaved
     }
 
+    @CacheEvict(cacheNames = ["Launch"], key = "#root.method.name + #id")
     override fun delete(id: String) {
         launchRepository.deleteById(id)
     }

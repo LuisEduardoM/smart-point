@@ -2,6 +2,7 @@ package pontointeligente.domain.entity
 
 import com.amazonaws.services.dynamodbv2.datamodeling.*
 import pontointeligente.domain.enums.TypeEnum
+import java.io.Serializable
 import javax.persistence.*
 
 @Entity
@@ -35,7 +36,7 @@ data class Launch(
     @field:DynamoDBAttribute(attributeName = "employeeCpf")
     @get:Column(name = "employeeCpf")
     var employeeCpf: String = ""
-) {
+) : Serializable {
 
     @Transient
     @field:DynamoDBHashKey(attributeName = "pk")

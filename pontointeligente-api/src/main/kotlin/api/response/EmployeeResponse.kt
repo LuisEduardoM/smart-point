@@ -3,12 +3,13 @@ package api.response
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import pontointeligente.domain.entity.Address
+import java.io.Serializable
 
 @ApiModel("Employee response")
 data class EmployeeResponse(
     @ApiModelProperty("Cpf")
     val cpf: String
-) {
+) : Serializable {
 
     constructor(
         cpf: String,

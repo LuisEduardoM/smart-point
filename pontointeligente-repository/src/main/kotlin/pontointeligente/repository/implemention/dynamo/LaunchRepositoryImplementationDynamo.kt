@@ -24,7 +24,7 @@ class LaunchRepositoryImplementationDynamo(private val dynamoDBMapper: DynamoDBM
         val query = DynamoDBScanExpression()
             .withFilterExpression(expression)
             .addExpressionAttributeValuesEntry(":pk", AttributeValue(pkBeginWith))
-        return dynamoDBMapper.scan(Launch::class.java, query, null)
+        return dynamoDBMapper.scan(Launch::class.java, query, null).toList()
     }
 
     override fun findById(id: String): Optional<Launch> {
@@ -48,7 +48,7 @@ class LaunchRepositoryImplementationDynamo(private val dynamoDBMapper: DynamoDBM
             .addExpressionAttributeValuesEntry(":cpf", AttributeValue("EMPLOYEE_CPF-$employeeCpf"))
             .addExpressionAttributeValuesEntry(":sk", AttributeValue("LAUNCH_ID"))
             .withConsistentRead(false)
-        return dynamoDBMapper.query(Launch::class.java, query)
+        return dynamoDBMapper.query(Launch::class.java, query).toList()
     }
 
     override fun findLaunchByEmployeeDateAndType(employeeCpf: String, dateLaunch: LocalDate, type: TypeEnum): Launch? {

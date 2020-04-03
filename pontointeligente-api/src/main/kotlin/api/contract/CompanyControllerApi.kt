@@ -5,6 +5,9 @@ import api.request.CompanyUpdateRequest
 import api.response.CompanyResponse
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import pontointeligente.domain.entity.Company
@@ -19,6 +22,7 @@ interface CompanyControllerApi {
     @ResponseStatus(HttpStatus.OK)
     fun findAll(): List<CompanyResponse>
 
+    @Cacheable(cacheNames = ["Company"], key = "#cnpj")
     @ApiOperation("Find company by cnpj")
     @GetMapping("/{cnpj}")
     @ResponseStatus(HttpStatus.OK)

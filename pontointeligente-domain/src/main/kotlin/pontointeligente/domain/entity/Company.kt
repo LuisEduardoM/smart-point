@@ -1,6 +1,7 @@
 package pontointeligente.domain.entity
 
 import com.amazonaws.services.dynamodbv2.datamodeling.*
+import java.io.Serializable
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
@@ -27,7 +28,10 @@ data class Company(
     @DynamoDBTypeConvertedJson
     @field:DynamoDBAttribute(attributeName = "address")
     var address: Map<String, Address> = emptyMap()
-) {
+) : Serializable {
+
+    private val serialVersionUID = 1L
+
     @Transient
     @field:DynamoDBHashKey(attributeName = "pk")
     var pk: String = "COMPANY_ID-$id"
